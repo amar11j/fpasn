@@ -6,6 +6,7 @@ from plotly.subplots import make_subplots
 import streamlit as st
 from streamlit_option_menu import option_menu
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Sidebar option menu
 with st.sidebar:
@@ -92,6 +93,26 @@ with st.sidebar:
         st.session_state.button16_clicked = False
     def on_button16_click():
         st.session_state.button16_clicked = True
+    
+    if 'button17_clicked' not in st.session_state:
+        st.session_state.button17_clicked = False
+    def on_button17_click():
+        st.session_state.button17_clicked = True
+
+    if 'button18_clicked' not in st.session_state:
+        st.session_state.button18_clicked = False
+    def on_button18_click():
+        st.session_state.button18_clicked = True
+
+    if 'button19_clicked' not in st.session_state:
+        st.session_state.button19_clicked = False
+    def on_button19_click():
+        st.session_state.button19_clicked = True
+        
+    if 'button20_clicked' not in st.session_state:
+        st.session_state.button20_clicked = False
+    def on_button20_click():
+        st.session_state.button20_clicked = True
 
 
 
