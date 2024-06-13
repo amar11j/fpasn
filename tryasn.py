@@ -10,7 +10,7 @@ import seaborn as sns
 
 # Sidebar option menu
 with st.sidebar:
-    Pilihan = option_menu('ASN', ['EEG1', 'EEG2', 'ECG'], icons=['house', 'basket2', 'card-list'], default_index=0)
+    Pilihan = option_menu('ASN', ['EEG1', 'EEG2', 'ECG'], icons=['clipboard-pulse', 'clipboard2-pulse-fill', 'clipboard2-pulse'], default_index=0)
 
     # Session state for buttons
     if 'button1_clicked' not in st.session_state:
@@ -1631,46 +1631,56 @@ if Pilihan == 'ECG':
 
 
         st.subheader('POINTCARE PLOT')
+
         temp = 0
-        interval = np.zeros(np.size(hasil_QRS))
-        BPM = np.zeros(np.size(hasil_QRS))
-        
+        interval = np.zeros(ptp)
+        BPM = np.zeros(ptp)
         for n in range(1, ptp):
             interval[n] = (peak[n] - peak[n-1]) * (1/fs)
             BPM[n] = 60 / interval[n]
             temp += BPM[n]
-        rata = temp / (n if n != 0 else 1)
-
+        rata = temp / (ptp - 1)
         
         def create_poincare_plot(interval):
             x = interval[:-1]
             y = interval[1:]
+            x_mean = np.mean(x)
+            y_mean = np.mean(y)
+            diff1 = (x - x_mean) + (y - y_mean)
+            diff2 = (x - x_mean) - (y - y_mean)
+            SD1 = np.sqrt(np.var(diff2) / 2)
+            SD2 = np.sqrt(np.var(diff1) / 2)
+            S = np.pi * SD1 * SD2
+            SD_ratio = SD1 / SD2
+            
+            st.write("SD1:", SD1)
+            st.write("SD2:", SD2)
+            st.write("S:", S)
+            st.write("SD_ratio:", SD_ratio)
             
             plt.figure(figsize=(6, 6))
-            plt.scatter(x, y, s=5, c='blue', alpha=0.5)
-            plt.title('Poincaré Plot of RR Intervals')
-            plt.xlabel('RR(n)')
-            plt.ylabel('RR(n+1)')
+            plt.scatter(x, y, s=5, c='red', alpha=0.5)
+            
+            ellipse = plt.Circle((x_mean, y_mean), 1.96 * SD2, color='yellow', alpha=0.2)
+            plt.gca().add_artist(ellipse)
+            
+            plt.plot([x_mean, x_mean + SD1 * np.cos(np.pi/4)], [y_mean, y_mean + SD1 * np.sin(np.pi/4)], 'g', label=f'SD1: {SD1:.3f}ms')
+            plt.plot([x_mean, x_mean + SD2 * np.cos(3*np.pi/4)], [y_mean, y_mean + SD2 * np.sin(3*np.pi/4)], 'b', label=f'SD2: {SD2:.3f}ms')
+            
+            line_length = max(max(x), max(y))
+            plt.plot([x_mean - line_length, x_mean + line_length], [y_mean - line_length, y_mean + line_length], 'g--')
+            plt.plot([x_mean - line_length, x_mean + line_length], [y_mean + line_length, y_mean - line_length], 'b--')
+            plt.title('Poincaré')
+            plt.xlabel(r'$NN_{i} [ms]$')
+            plt.ylabel(r'$NN_{i+1} [ms]$')
             plt.grid(True)
-            #st.pyplot(plt)
-        
+            plt.legend(loc='lower right')
+            plt.annotate(f'S: {S:.3f}ms²\nSD1/SD2: {SD_ratio:.3f}', xy=(0.7, 0.9), xycoords='axes fraction')
+            
+            #plt.show()
         
         create_poincare_plot(interval)
-        diff_intervals = np.diff(interval)
-        mean_interval = np.mean(interval)
-        SD1 = np.std(diff_intervals) / np.sqrt(2)
-        SD2 = np.sqrt(2 * np.std(interval)**2 - SD1**2)
-        
         but13= st.button('Lihat                                 ', on_click=on_button13_click)
         if st.session_state.button13_clicked:
             st.write("Intervals:", interval)
             st.pyplot(plt)
-            st.write(f"SD1: {SD1}")
-            st.write(f"SD2: {SD2}")
-        
-        
-
-
-
-
-        
