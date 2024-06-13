@@ -5,3 +5,4 @@ pandas
 python-math
 plotly
 matplotlib
+seaborn
